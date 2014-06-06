@@ -1,0 +1,8 @@
+.bundle/
+.envrc
+*.sw?
+errors.err
+last_run
+loop/
+log/
+corundum/

@@ -1,5 +1,5 @@
 require 'rack'
-require 'fluoride-collector/middleware'
+require 'fluoride-collector'
 
 describe Fluoride::Collector::Middleware do
   include FileSandbox

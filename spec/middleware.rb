@@ -11,8 +11,9 @@ describe Fluoride::Collector::Middleware do
 
   let :app do
     run_app = test_app
+    klass = middleware_class
     Rack::Builder.app do
-      use Fluoride::Collector::Middleware, "collections", "TEST"
+      use klass, "collections", "TEST"
       run run_app
     end
   end
@@ -24,6 +25,10 @@ describe Fluoride::Collector::Middleware do
   describe "handling exception" do
     let :test_ex_class do
       Class.new(Exception)
+    end
+
+    let :middleware_class do
+      Fluoride::Collector::Middleware::CollectExceptions
     end
 
     let :test_app do
@@ -42,7 +47,7 @@ describe Fluoride::Collector::Middleware do
           app.call(env)
         rescue test_ex_class
         end
-      end.to change{collection_directory.each.to_a.grep(/collection.*/).size}
+      end.to change{collection_directory.each.to_a.grep(/[a-z].*/).size}
     end
 
     it "should keep using the same collection file" do
@@ -56,8 +61,7 @@ describe Fluoride::Collector::Middleware do
           app.call(env)
         rescue test_ex_class
         end
-        path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/collection.*/).first)
-      end.not_to change{collection_directory.each.to_a.grep(/collection.*/).size}
+      end.not_to change{collection_directory.each.to_a.grep(/[a-z].*/).size}
     end
 
     describe "creates a file" do
@@ -66,12 +70,12 @@ describe Fluoride::Collector::Middleware do
           app.call(env)
         rescue test_ex_class
         end
-        path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/collection.*/).first)
+        path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/[a-z].*/).first)
         YAML.load_stream(File.read(path)).first
       end
 
       it "should have tags" do
-        yaml["tags"].should == "TEST"
+        expect(yaml["tags"]).to eq "TEST"
       end
     end
   end
@@ -85,33 +89,36 @@ describe Fluoride::Collector::Middleware do
       [200, {'Content-Type' => 'text/plain'}, ['Just a test']]
     end
 
+    let :middleware_class do
+      Fluoride::Collector::Middleware::CollectExchanges
+    end
+
     it "should not change the response" do
-      app.call(env).should == response
+      expect(app.call(env)).to eq response
     end
 
     it "should create a collection file" do
       expect do
         app.call(env)
-      end.to change{collection_directory.each.to_a.grep(/collection.*/).size}
+      end.to change{collection_directory.each.to_a.grep(/[a-z].*/).size}
     end
 
     it "should keep using the same collection file" do
       app.call(env)
       expect do
         app.call(env)
-        path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/collection.*/).first)
-      end.not_to change{collection_directory.each.to_a.grep(/collection.*/).size}
+      end.not_to change{collection_directory.each.to_a.grep(/[a-z].*/).size}
     end
 
     describe "creates a file" do
       let :yaml do
         app.call(env)
-        path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/collection.*/).first)
+        path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/[a-z].*/).first)
         YAML.load_stream(File.read(path)).first
       end
 
       it "should have tags" do
-        yaml["tags"].should == "TEST"
+        expect(yaml["tags"]).to eq "TEST"
       end
     end
   end

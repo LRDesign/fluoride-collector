@@ -1,10 +1,10 @@
 source "https://rubygems.org"
 
-gem 'rspec', "< 3.0"
-gem 'cadre'
+gem 'rspec'
+gem 'cadre', :path => "../../gems/cadre/"
 gem 'rack'
 gem 'corundum'
 gem 'stack_loop'
-gem 'fuubar'
+gem 'fuubar', "~> 2.0.0.rc1"
 gem 'rails', "~> 4.0.0"
 gemspec :name => "fluoride-collector" #points to default 'gem.gemspec'

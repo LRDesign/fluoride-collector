@@ -7,33 +7,26 @@ module Fluoride
         @tagging = tagging
       end
 
-      def call(env)
-        @app.call(env).tap do |response|
-          record_exchange(env, response)
-        end
-      rescue Object => ex
-        record_exception(env, ex)
-        raise
-      end
-
       private
 
-      def record_exchange(env, response)
-        store(
-          "type" => "normal_exchange",
-          "tags" => @tagging,
-          "request" => request_hash(env),
-          "response" => response_hash(response)
-        )
+      def thread_locals
+        Thread.current[:fluoride_collector] ||= {}
       end
 
-      def record_exception(env, ex)
-        store(
-          "type" => "exception_raised",
-          "tags" => @tagging,
-          "request" => request_hash(env),
-          "response" => exception_hash(ex)
-        )
+      def storage_path
+        thread_locals[collection_type] ||= File::join(@directory, "#{collection_type}-#{Process.pid}-#{Thread.current.object_id}.yml")
+      end
+
+      def storage_file
+        File::open(storage_path, "a") do |file|
+          yield file
+        end
+      end
+
+      def store(record)
+        storage_file do |file|
+          file.write(YAML::dump(record))
+        end
       end
 
       def request_hash(env)
@@ -51,46 +44,65 @@ module Fluoride
           "method" => env["REQUEST_METHOD"],
           "host" => env['HTTP_HOST'] || "#{env['SERVER_NAME'] || env['SERVER_ADDR']}:#{env['SERVER_PORT']}",
           "path" => env["SCRIPT_NAME"].to_s + env["PATH_INFO"].to_s,
-          "query_string" => env["QUERY_STRING"].to_s,
-          "body" => body,
+            "query_string" => env["QUERY_STRING"].to_s,
+            "body" => body,
         }
       end
 
-      def response_hash(response)
-        status, headers, body = *response
+      class CollectExceptions < Middleware
+        def call(env)
+          @app.call(env)
+        rescue Object => ex
+          store(
+            "type" => "exception_raised",
+            "tags" => @tagging,
+            "request" => request_hash(env),
+            "response" => exception_hash(ex)
+          )
+          raise
+        end
 
-        {
-          "status" => status,
-          "headers" => headers,
-          "body" => body.to_a.join("") #every body? all of it?
-        }
-      end
+        private
 
-      def exception_hash(ex)
-        {
-          "type" => ex.class.name,
-          "message" => ex.message,
-          "backtrace" => ex.backtrace[0..10]
-        }
-      end
+        def collection_type
+          :exception
+        end
 
-      def thread_locals
-        Thread.current[:fluoride_collector] ||= {}
-      end
-
-      def storage_path
-        thread_locals[:storage_path] ||= File::join(@directory, "collection-#{Process.pid}-#{Thread.current.object_id}.yml")
-      end
-
-      def storage_file
-        File::open(storage_path, "a") do |file|
-          yield file
+        def exception_hash(ex)
+          {
+            "type" => ex.class.name,
+            "message" => ex.message,
+            "backtrace" => ex.backtrace[0..10]
+          }
         end
       end
 
-      def store(record)
-        storage_file do |file|
-          file.write(YAML::dump(record))
+      class CollectExchanges < Middleware
+        def call(env)
+          @app.call(env).tap do |response|
+            store(
+              "type" => "normal_exchange",
+              "tags" => @tagging,
+              "request" => request_hash(env),
+              "response" => response_hash(response)
+            )
+          end
+        end
+
+        private
+
+        def collection_type
+          :exchange
+        end
+
+        def response_hash(response)
+          status, headers, body = *response
+
+          {
+            "status" => status,
+            "headers" => headers,
+            "body" => body.to_a.join("") #every body? all of it?
+          }
         end
       end
     end

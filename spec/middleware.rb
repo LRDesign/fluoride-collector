@@ -13,7 +13,7 @@ describe Fluoride::Collector::Middleware do
     run_app = test_app
     klass = middleware_class
     Rack::Builder.app do
-      use klass, "collections", "TEST"
+      use klass, "collections", 1500, "TEST"
       run run_app
     end
   end

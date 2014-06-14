@@ -1,9 +1,10 @@
 module Fluoride
   module Collector
     class Middleware
-      def initialize(app, directory, tagging = nil)
+      def initialize(app, directory, storage_limit = 250_000_000, tagging = nil)
         @app = app
         @directory = directory
+        @storage_limit = storage_limit
         @tagging = tagging
       end
 
@@ -18,8 +19,21 @@ module Fluoride
       end
 
       def storage_file
+        FileUtils.mkdir_p(File::dirname(storage_path))
+        return if storage_used > @storage_limit
         File::open(storage_path, "a") do |file|
           yield file
+        end
+      end
+
+      def storage_used
+        dir = Dir.new(@directory)
+        dir.inject(0) do |sum, file|
+          if file =~ %r{\A\.}
+            sum
+          else
+            sum + File.size(File::join(@directory, file))
+          end
         end
       end
 
@@ -44,8 +58,8 @@ module Fluoride
           "method" => env["REQUEST_METHOD"],
           "host" => env['HTTP_HOST'] || "#{env['SERVER_NAME'] || env['SERVER_ADDR']}:#{env['SERVER_PORT']}",
           "path" => env["SCRIPT_NAME"].to_s + env["PATH_INFO"].to_s,
-            "query_string" => env["QUERY_STRING"].to_s,
-            "body" => body,
+          "query_string" => env["QUERY_STRING"].to_s,
+          "body" => body,
         }
       end
 
@@ -95,13 +109,22 @@ module Fluoride
           :exchange
         end
 
+        def extract_body(body)
+          array = []
+          body.each do |chunk|
+            array << chunk
+          end
+          body.rewind if body.respond_to?(:rewind)
+          array
+        end
+
         def response_hash(response)
           status, headers, body = *response
 
           {
             "status" => status,
             "headers" => headers,
-            "body" => body.to_a.join("") #every body? all of it?
+            "body" => extract_body(body)
           }
         end
       end

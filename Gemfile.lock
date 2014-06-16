@@ -57,7 +57,7 @@ GEM
       simplecov (>= 0.5.4)
       yard
     diff-lcs (1.2.5)
-    docile (1.1.4)
+    docile (1.1.5)
     erubis (2.7.0)
     fssm (0.2.10)
     fuubar (2.0.0.rc1)

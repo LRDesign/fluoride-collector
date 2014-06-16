@@ -1,3 +1,5 @@
+require 'uri'
+
 module Fluoride
   module Collector
     class Middleware
@@ -43,13 +45,30 @@ module Fluoride
         end
       end
 
+      def clean_hash(hash)
+        hash.each_key do |key|
+          value = hash[key]
+          case value
+          when String
+            if value.ascii_only?
+              value = value.dup
+              value.force_encoding("US-ASCII")
+              hash[key] = value
+            end
+          when Hash
+            hash[key] = clean_hash(value)
+          end
+        end
+        hash
+      end
+
       def request_hash(env)
         body = nil
         if env['rack.input'].respond_to? :read
           body = env['rack.input'].read
           env['rack.input'].rewind rescue nil
         end
-        {
+        clean_hash(
           "content_type" => env['CONTENT_TYPE'],
           "accept" => env["HTTP_ACCEPT_ENCODING"],
           "referer" => env["HTTP_REFERER"],
@@ -57,22 +76,22 @@ module Fluoride
           "authorization" => env["HTTP_AUTHORIZATION"],
           "method" => env["REQUEST_METHOD"],
           "host" => env['HTTP_HOST'] || "#{env['SERVER_NAME'] || env['SERVER_ADDR']}:#{env['SERVER_PORT']}",
-          "path" => env["SCRIPT_NAME"].to_s + env["PATH_INFO"].to_s,
+          "path" => URI.unescape(env["SCRIPT_NAME"].to_s + env["PATH_INFO"].to_s),
           "query_string" => env["QUERY_STRING"].to_s,
           "body" => body,
-        }
+        )
       end
 
       class CollectExceptions < Middleware
         def call(env)
           @app.call(env)
         rescue Object => ex
-          store(
-            "type" => "exception_raised",
-            "tags" => @tagging,
-            "request" => request_hash(env),
-            "response" => exception_hash(ex)
-          )
+          store( clean_hash(
+              "type" => "exception_raised",
+              "tags" => @tagging,
+              "request" => request_hash(env),
+              "response" => exception_hash(ex)
+          ))
           raise
         end
 
@@ -94,12 +113,12 @@ module Fluoride
       class CollectExchanges < Middleware
         def call(env)
           @app.call(env).tap do |response|
-            store(
+            store( clean_hash(
               "type" => "normal_exchange",
               "tags" => @tagging,
               "request" => request_hash(env),
               "response" => response_hash(response)
-            )
+            ))
           end
         end
 
@@ -123,7 +142,7 @@ module Fluoride
 
           {
             "status" => status,
-            "headers" => headers,
+            "headers" => headers.to_hash,
             "body" => extract_body(body)
           }
         end

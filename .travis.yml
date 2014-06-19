@@ -1,24 +1,21 @@
 language: ruby
 matrix:
   include:
-    - rvm: 1.8.7
-      gemfile: Gemfile.ruby-1.8.7
-      script: bundle exec rspec spec -O .rspec-18
-
-    - rvm: 1.9.3
-      gemfile: Gemfile
-      script: bundle exec rake ci
-
-    - rvm: 2.0.0
-      gemfile: Gemfile
-      script: bundle exec rake ci
-
-    - rvm: 2.1.0
-      gemfile: Gemfile
-      script: bundle exec rake ci
+  - rvm: 1.8.7
+    gemfile: Gemfile.ruby-1.8.7
+    script: bundle exec rspec spec -O .rspec-18
+  - rvm: 1.9.3
+    gemfile: Gemfile
+    script: bundle exec rake ci
+  - rvm: 2.0.0
+    gemfile: Gemfile
+    script: bundle exec rake ci
+  - rvm: 2.1.0
+    gemfile: Gemfile
+    script: bundle exec rake ci
 install: .travis-support/cached-bundle install --deployment
 env:
   global:
   - AMAZON_S3_BUCKET=lrd-travis-caching
-  - secure: b+5Ei+klIudmG+mWu2y6EgHZ/1GxOYX65jGskmQm85lahFUn9jVUn4IhDbERTmBGjjovZvAZ1cIzZg7hhOH2WRcWJX5My13KZv3hurz2jWeziIQp2LtURi7Ghah/1py+82oFTTQe/18A+ONGN7tksqAlWen/UOmfZzXpNPnyF9s=
-  - secure: FxV30BIED4dP/GkBGF8gtoWirzDzT0Gzn0GxocREp0BZAY9ti5YYoDQixPVCvtQCIKPUjUHnNd8KXdn0HtUhlgLhg7lEE03MoupsXoMZk8gNBeffcCRkzrpVBTmLEhdnoV3UNKpfn2+qCUSqqJimTarDe6k/7F5FzOl3R+xJgxw=
+  - secure: MoQG7N5aig5thr3kcQd0ilT2zi8mkzF+ur7Kb8JMvxRwYvxR53jBA4gT+0ytizoioG+zYoqvPWPA3ETt5IYQZ4qw6sBQInih7yZ2MlShylK9ia+Zs0R6kLw+Yf2cPphiPNrHUU314WHV3Gmwy0WLBlgtLAkMJYJOcPgadjh93u4=
+  - secure: PQ2eW4jk7MR8IDx25QOY4VqlCHdDCkyUBCxhCbJmdbKTDcBfW8qL17tqB/QH41C9zwc8FbnLWp5zWt871HIWStF/kgxTrLqNe87duHnzk5QDUBVWDYZlLQIZeJ1EDc8uKAd6SBhrD/+W/CMO8VdieUJiFzWPkjtGwkt+FwrTyQs=

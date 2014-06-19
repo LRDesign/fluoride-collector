@@ -1,8 +1,9 @@
 Gem::Specification.new do |spec|
   spec.name		= "fluoride-collector"
-  spec.version		= "0.0.3"
+  spec.version		= "0.0.4"
   author_list = {
-    "Judson Lester" => 'nyarly@gmail.com'
+    "Judson Lester" => 'nyarly@gmail.com',
+    "Evan Down" => 'evan@lrdesign.com'
   }
   spec.authors		= author_list.keys
   spec.email		= spec.authors.map {|name| author_list[name]}
@@ -11,7 +12,6 @@ Gem::Specification.new do |spec|
   Part of the Fluoride suite - tools for making your black box a bit whiter
   EndDescription
 
-  spec.rubyforge_project= spec.name.downcase
   spec.homepage        = "http://nyarly.github.com/#{spec.name.downcase}"
   spec.required_rubygems_version = Gem::Requirement.new(">= 0") if spec.respond_to? :required_rubygems_version=
 
@@ -19,9 +19,16 @@ Gem::Specification.new do |spec|
   # !!find lib bin doc spec spec_help -not -regex '.*\.sw.' -type f 2>/dev/null
   spec.files		= %w[
     lib/fluoride-collector/rails/railtie.rb
+    lib/fluoride-collector/config.rb
+    lib/fluoride-collector/middleware/collect-exchanges.rb
+    lib/fluoride-collector/middleware/collect-exceptions.rb
     lib/fluoride-collector/rails.rb
+    lib/fluoride-collector/storage/fs.rb
+    lib/fluoride-collector/storage/s3.rb
+    lib/fluoride-collector/storage.rb
     lib/fluoride-collector/middleware.rb
     lib/fluoride-collector.rb
+
     spec/railtie.rb
     spec/middleware.rb
     spec_help/spec_helper.rb

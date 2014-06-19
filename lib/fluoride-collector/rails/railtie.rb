@@ -1,3 +1,5 @@
+require 'fluoride-collector'
+
 module Fluoride
   module Collector
     class Railtie < ::Rails::Railtie

@@ -3,6 +3,8 @@ require 'fluoride-collector'
 module Fluoride
   module Collector
     class Middleware
+      attr_reader :config
+
       def initialize(app, config)
         @app = app
         @config = config

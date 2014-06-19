@@ -5,5 +5,5 @@
 -I spec_help/interpose
 -I lib
 -I spec_help
---require spec_helper
+--require spec_helper_18
 --pattern *.rb

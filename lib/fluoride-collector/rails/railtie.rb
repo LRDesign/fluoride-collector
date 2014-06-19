@@ -11,7 +11,7 @@ module Fluoride
                               config.fluoride.directory,
                               config.fluoride.storage_limit,
                               config.fluoride.tags)
-        app.middleware.insert("Rack::Sendfile",
+        app.middleware.insert(0,
                               Fluoride::Collector::Middleware::CollectExchanges,
                               config.fluoride.directory,
                               config.fluoride.storage_limit,

@@ -50,7 +50,7 @@ module Fluoride
           value = hash[key]
           case value
           when String
-            if value.ascii_only?
+            if value.ascii_only? and value.respond_to?(:force_encoding)
               value = value.dup
               value.force_encoding("US-ASCII")
               hash[key] = value
@@ -78,7 +78,7 @@ module Fluoride
           "host" => env['HTTP_HOST'] || "#{env['SERVER_NAME'] || env['SERVER_ADDR']}:#{env['SERVER_PORT']}",
           "path" => URI.unescape(env["SCRIPT_NAME"].to_s + env["PATH_INFO"].to_s),
           "query_string" => env["QUERY_STRING"].to_s,
-          "body" => body,
+          "body" => body
         )
       end
 

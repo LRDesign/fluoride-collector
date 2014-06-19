@@ -50,7 +50,7 @@ module Fluoride
           value = hash[key]
           case value
           when String
-            if value.ascii_only? and value.respond_to?(:force_encoding)
+            if value.respond_to?(:ascii_only?) and value.ascii_only? and value.respond_to?(:force_encoding)
               value = value.dup
               value.force_encoding("US-ASCII")
               hash[key] = value

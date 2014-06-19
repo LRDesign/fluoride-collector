@@ -71,7 +71,8 @@ describe Fluoride::Collector::Middleware do
         rescue test_ex_class
         end
         path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/[a-z].*/).first)
-        YAML.load_stream(File.read(path)).first
+        stream = YAML.load_stream(File.read(path))
+        stream[0]
       end
 
       it "should have tags" do
@@ -114,7 +115,7 @@ describe Fluoride::Collector::Middleware do
       let :yaml do
         app.call(env)
         path = File::join(collection_directory.path, collection_directory.each.to_a.grep(/[a-z].*/).first)
-        YAML.load_stream(File.read(path)).first
+        YAML.load_stream(File.read(path))[0]
       end
 
       it "should have tags" do

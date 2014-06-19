@@ -17,7 +17,6 @@ module Fixture
   end
 end
 
-p Rails.configuration.middleware
 # Initialize the application
 Fixture::Application.initialize!
 

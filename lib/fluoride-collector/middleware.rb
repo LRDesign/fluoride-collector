@@ -2,39 +2,40 @@ require 'uri'
 
 module Fluoride
   module Collector
+    class ConfigurationError < ::StandardError
+    end
+
     class Config
       attr_accessor :tags
 
       def persister(type, record)
         persister_class.new(self, type, record)
       end
-    end
 
-    class FSConfig < Config
-      attr_accessor :directory, :storage_limit
+      class FS < Config
+        attr_accessor :directory, :storage_limit
 
-      def initialize
-        @storage_limit = 250_000_000
+        def initialize
+          @storage_limit = 250_000_000
+        end
+
+        def persister_class
+          Storage::FS
+        end
       end
 
-      def persister_class
-        FSStorage
-      end
-    end
+      class S3 < Config
+        attr_accessor :bucket, :key_id, :access_secret
 
+        def initialize
+          require 'net/http'
+          require 'openssl'
+          require 'base64'
+        end
 
-
-    class S3Config < Config
-      attr_accessor :bucket, :key_id, :access_secret
-
-      def initialize
-        require 'net/http'
-        require 'openssl'
-        require 'base64'
-      end
-
-      def persister_class
-        S3Storage
+        def persister_class
+          Storage::S3
+        end
       end
     end
 
@@ -54,120 +55,120 @@ module Fluoride
       def record_yaml
         @record_yaml ||= YAML::dump(record)
       end
-    end
 
-    class S3Storage < Storage
-      def write
-        Net::HTTP.start(host, port) do |http|
-          res = http.request(put_request)
-        end
-      end
-
-      def bucket
-        @config.bucket
-      end
-
-      def key_id
-        @config.key_id
-      end
-
-      def access_secret
-        @config.access_secret
-      end
-
-      def host
-        "#{bucket}.s3.amazonaws.com"
-      end
-
-      def port
-        443
-      end
-
-      def request_index
-        @request_index ||=
-          begin
-            thread_locals[:request_index] ||= 0
-            thread_locals[:request_index] += 1
-          end
-      end
-
-      def remote_path
-        @remote_path ||= "#{collection_type}-#{Process.pid}-#{Thread.current.object_id}-#{request_index}.yml"
-      end
-
-      def uri
-        "https://#{host}/#{remote_path}"
-      end
-
-      def authorization
-        hmac = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, string_to_sign, access_secret)
-        signature = Base64.strict_encode64(hmac)
-
-        "AWS #{key_id}:#{signature}"
-      end
-
-      def string_to_sign
-        "PUT\n#{content_md5}\n#{content_type}\n#{date}\n/#{bucket}/#{remote_path}"
-      end
-
-      def content_md5
-        @context_md5 ||= Base64.strict_encode64(OpenSSL::Digest::MD5.digest(record_yaml))
-      end
-
-      def content_type
-        "text/yaml"
-      end
-
-      def date
-        @date ||= Time.now.strftime("+%a, %d %h %Y %T %z")
-      end
-
-      def put_request
-        req = Net::HTTP::Put.new(uri)
-        req["Authorization"] = authorization
-        req["Date"] = date
-        req["Content-MD5"] = content_md5
-        req["Content-Type"] = content_type
-        req.body = record_yaml
-        return req
-      end
-    end
-
-    class FSStorage < Storage
-      def directory
-        @config.directory
-      end
-
-      def storage_limit
-        @config.storage_limit
-      end
-
-      def write
-        storage_file do |file|
-          file.write(record_yaml)
-        end
-      end
-
-      def storage_used
-        dir = Dir.new(directory)
-        dir.inject(0) do |sum, file|
-          if file =~ %r{\A\.}
-            sum
-          else
-            sum + File.size(File::join(directory, file))
+      class S3< Storage
+        def write
+          Net::HTTP.start(host, port) do |http|
+            res = http.request(put_request)
           end
         end
+
+        def bucket
+          @config.bucket
+        end
+
+        def key_id
+          @config.key_id
+        end
+
+        def access_secret
+          @config.access_secret
+        end
+
+        def host
+          "#{bucket}.s3.amazonaws.com"
+        end
+
+        def port
+          443
+        end
+
+        def request_index
+          @request_index ||=
+            begin
+              thread_locals[:request_index] ||= 0
+              thread_locals[:request_index] += 1
+            end
+        end
+
+        def remote_path
+          @remote_path ||= "#{collection_type}-#{Process.pid}-#{Thread.current.object_id}-#{request_index}.yml"
+        end
+
+        def uri
+          "https://#{host}/#{remote_path}"
+        end
+
+        def authorization
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, string_to_sign, access_secret)
+          signature = Base64.strict_encode64(hmac)
+
+          "AWS #{key_id}:#{signature}"
+        end
+
+        def string_to_sign
+          "PUT\n#{content_md5}\n#{content_type}\n#{date}\n/#{bucket}/#{remote_path}"
+        end
+
+        def content_md5
+          @context_md5 ||= Base64.strict_encode64(OpenSSL::Digest::MD5.digest(record_yaml))
+        end
+
+        def content_type
+          "text/yaml"
+        end
+
+        def date
+          @date ||= Time.now.strftime("+%a, %d %h %Y %T %z")
+        end
+
+        def put_request
+          req = Net::HTTP::Put.new(uri)
+          req["Authorization"] = authorization
+          req["Date"] = date
+          req["Content-MD5"] = content_md5
+          req["Content-Type"] = content_type
+          req.body = record_yaml
+          return req
+        end
       end
 
-      def storage_path
-        thread_locals[collection_type] ||= File::join(directory, "#{collection_type}-#{Process.pid}-#{Thread.current.object_id}.yml")
-      end
+      class FS < Storage
+        def directory
+          @config.directory
+        end
 
-      def storage_file
-        FileUtils.mkdir_p(File::dirname(storage_path))
-        return if storage_used > storage_limit
-        File::open(storage_path, "a") do |file|
-          yield file
+        def storage_limit
+          @config.storage_limit
+        end
+
+        def write
+          storage_file do |file|
+            file.write(record_yaml)
+          end
+        end
+
+        def storage_used
+          dir = Dir.new(directory)
+          dir.inject(0) do |sum, file|
+            if file =~ %r{\A\.}
+              sum
+            else
+              sum + File.size(File::join(directory, file))
+            end
+          end
+        end
+
+        def storage_path
+          thread_locals[collection_type] ||= File::join(directory, "#{collection_type}-#{Process.pid}-#{Thread.current.object_id}.yml")
+        end
+
+        def storage_file
+          FileUtils.mkdir_p(File::dirname(storage_path))
+          return if storage_used > storage_limit
+          File::open(storage_path, "a") do |file|
+            yield file
+          end
         end
       end
     end

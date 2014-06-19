@@ -1,6 +1,6 @@
 require 'fluoride-collector'
 
-describe Fluoride::Collector::S3Storage do
+describe Fluoride::Collector::Storage::S3 do
   let :record do
     {"tagging" => "TEST"}
   end
@@ -10,7 +10,7 @@ describe Fluoride::Collector::S3Storage do
   end
 
   let :config do
-    Fluoride::Collector::S3Config.new.tap do |cfg|
+    Fluoride::Collector::Config::S3.new.tap do |cfg|
       cfg.bucket = "test-bucket"
       cfg.key_id = "AKIASOMETHINGSOMETHING"
       cfg.access_secret = "cabbagecabbage"

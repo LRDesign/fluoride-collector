@@ -7,9 +7,10 @@ module Fluoride
   module Collector
     class Storage
       class S3 < Storage
+        attr_reader :response
         def write
-          Net::HTTP.start(host, port) do |http|
-            res = http.request(put_request)
+          Net::HTTP.start(host, port, :use_ssl => true) do |http|
+            @response = http.request(put_request)
           end
         end
 
@@ -50,7 +51,7 @@ module Fluoride
         end
 
         def authorization
-          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, string_to_sign, access_secret)
+          hmac = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, access_secret, string_to_sign)
           signature = Base64.strict_encode64(hmac)
 
           "AWS #{key_id}:#{signature}"
@@ -69,17 +70,20 @@ module Fluoride
         end
 
         def date
-          @date ||= Time.now.strftime("+%a, %d %h %Y %T %z")
+          @date ||= Time.now.strftime("%a, %d %h %Y %T %z")
         end
 
         def put_request
-          req = Net::HTTP::Put.new(uri)
-          req["Authorization"] = authorization
-          req["Date"] = date
-          req["Content-MD5"] = content_md5
-          req["Content-Type"] = content_type
-          req.body = record_yaml
-          return req
+          @req ||=
+            begin
+              req = Net::HTTP::Put.new(uri)
+              req["Authorization"] = authorization
+              req["Date"] = date
+              req["Content-MD5"] = content_md5
+              req["Content-Type"] = content_type
+              req.body = record_yaml
+              req
+            end
         end
       end
     end

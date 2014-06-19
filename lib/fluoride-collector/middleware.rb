@@ -2,15 +2,34 @@ require 'uri'
 
 module Fluoride
   module Collector
+    class Config
+      attr_accessor :directory, :storage_limit, :tagging
+
+      def initialize
+        @storage_limit = 250_000_000
+      end
+    end
+
     class Middleware
-      def initialize(app, directory, storage_limit = 250_000_000, tagging = nil)
+      def initialize(app, config)
         @app = app
-        @directory = directory
-        @storage_limit = storage_limit
-        @tagging = tagging
+        @directory = config.directory
+        @storage_limit = config.storage_limit
+        @tagging = config.tagging
       end
 
       private
+
+      def storage_used
+        dir = Dir.new(@directory)
+        dir.inject(0) do |sum, file|
+          if file =~ %r{\A\.}
+            sum
+          else
+            sum + File.size(File::join(@directory, file))
+          end
+        end
+      end
 
       def thread_locals
         Thread.current[:fluoride_collector] ||= {}
@@ -25,17 +44,6 @@ module Fluoride
         return if storage_used > @storage_limit
         File::open(storage_path, "a") do |file|
           yield file
-        end
-      end
-
-      def storage_used
-        dir = Dir.new(@directory)
-        dir.inject(0) do |sum, file|
-          if file =~ %r{\A\.}
-            sum
-          else
-            sum + File.size(File::join(@directory, file))
-          end
         end
       end
 

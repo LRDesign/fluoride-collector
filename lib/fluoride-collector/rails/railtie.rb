@@ -7,15 +7,14 @@ module Fluoride
       config.fluoride.directory = "fluoride-collector"
 
       initializer "fluoride-collector.add_middleware" do |app|
-        app.middleware.use(   Fluoride::Collector::Middleware::CollectExceptions,
-                              config.fluoride.directory,
-                              config.fluoride.storage_limit,
-                              config.fluoride.tags)
-        app.middleware.insert(0,
-                              Fluoride::Collector::Middleware::CollectExchanges,
-                              config.fluoride.directory,
-                              config.fluoride.storage_limit,
-                              config.fluoride.tags)
+        cfg = Fluoride::Collector::Config.new
+
+        cfg.directory = config.fluoride.directory
+        cfg.storage_limit = config.fluoride.storage_limit
+        cfg.tags = config.fluoride.tags
+
+        app.middleware.use(Fluoride::Collector::Middleware::CollectExceptions, cfg)
+        app.middleware.insert(0, Fluoride::Collector::Middleware::CollectExchanges, cfg)
       end
     end
   end

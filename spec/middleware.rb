@@ -9,11 +9,19 @@ describe Fluoride::Collector::Middleware do
     Dir.new(dir.path)
   end
 
+  let :config do
+    Fluoride::Collector::Config.new.tap do |cfg|
+      cfg.directory = "collections"
+      cfg.storage_limit = 1500
+      cfg.tags = "TEST"
+    end
+  end
+
   let :app do
     run_app = test_app
     klass = middleware_class
     Rack::Builder.app do
-      use klass, "collections", 1500, "TEST"
+      use klass, config
       run run_app
     end
   end

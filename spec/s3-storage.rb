@@ -1,4 +1,4 @@
-require 'fluoride-collector'
+require 'fluoride-collector/storage/s3'
 
 describe Fluoride::Collector::Storage::S3 do
   let :record do

@@ -20,8 +20,9 @@ describe Fluoride::Collector::Middleware do
   let :app do
     run_app = test_app
     klass = middleware_class
+    cfg = config
     Rack::Builder.app do
-      use klass, config
+      use klass, cfg
       run run_app
     end
   end

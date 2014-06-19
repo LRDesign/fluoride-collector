@@ -3,7 +3,7 @@ require 'uri'
 module Fluoride
   module Collector
     class Config
-      attr_accessor :directory, :storage_limit, :tagging
+      attr_accessor :directory, :storage_limit, :tags
 
       def initialize
         @storage_limit = 250_000_000
@@ -15,7 +15,7 @@ module Fluoride
         @app = app
         @directory = config.directory
         @storage_limit = config.storage_limit
-        @tagging = config.tagging
+        @tagging = config.tags
       end
 
       private

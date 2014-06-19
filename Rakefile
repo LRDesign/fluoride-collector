@@ -16,8 +16,12 @@ module Corundum
       end
     end
     rspec = RSpec.new(core)
-    cov = SimpleCov.new(core, rspec) do |cov|
-      cov.threshold = 95
+
+    unless RUBY_VERSION < '1.9.2'
+      raise 'foo'
+      cov = SimpleCov.new(core, rspec) do |cov|
+        cov.threshold = 95
+      end
     end
 
     gem = GemBuilding.new(core)

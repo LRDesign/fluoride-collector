@@ -7,7 +7,7 @@ module Fluoride
       config.fluoride.directory = "fluoride-collector"
 
       initializer "fluoride-collector.add_middleware" do |app|
-        cfg = Fluoride::Collector::Config.new
+        cfg = Fluoride::Collector::FSConfig.new
 
         cfg.directory = config.fluoride.directory
         cfg.storage_limit = config.fluoride.storage_limit

@@ -10,7 +10,7 @@ describe Fluoride::Collector::Middleware do
   end
 
   let :config do
-    Fluoride::Collector::Config.new.tap do |cfg|
+    Fluoride::Collector::FSConfig.new.tap do |cfg|
       cfg.directory = "collections"
       cfg.storage_limit = 1500
       cfg.tags = "TEST"

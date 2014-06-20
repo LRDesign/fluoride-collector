@@ -7,7 +7,9 @@ module Corundum
   core = Core.new
 
   core.in_namespace do
-    GemspecFiles.new(core)
+    GemspecFiles.new(core) do |gsf|
+      gsf.extra_files.include("certs/**/*")
+    end
 
     #Also available: 'unfinished': TODO and XXX
     ["debug", "profanity", "ableism", "racism"].each do |type|

@@ -35,6 +35,21 @@ Gem::Specification.new do |spec|
     spec_help/gem_test_suite.rb
     spec_help/railtie-help.rb
     spec_help/file-sandbox.rb
+
+    certs/1ec4d31a.0
+    certs/c01cdfa2.0
+    certs/bad35b78.0
+    certs/6faac4e3.0
+    certs/7d0b38bd.0
+    certs/ee1365c0.0
+    certs/24ad0b63.0
+    certs/b204d74a.0
+    certs/dc45b0bd.0
+    certs/cb357862.0
+    certs/b8e83700.0
+    certs/0f11b315.0
+    certs/c0ff1f52.0
+    certs/415660c1.0
   ]
 
   spec.test_file        = "spec_help/gem_test_suite.rb"

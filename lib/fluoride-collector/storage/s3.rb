@@ -12,13 +12,20 @@ module Fluoride
       class S3 < Storage
         attr_reader :response
         def write
-          http = Net::HTTP.new(host, port)
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-          http.ca_path = File.expand_path("../../../../certs", __FILE__)
           http.start do
             @response = http.request(put_request)
           end
+        end
+
+        def http
+          @http ||=
+            begin
+              http = Net::HTTP.new(host, port)
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+              http.ca_path = File.expand_path("../../../../certs", __FILE__)
+              http
+            end
         end
 
         def bucket

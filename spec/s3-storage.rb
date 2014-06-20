@@ -25,6 +25,12 @@ describe Fluoride::Collector::Storage::S3 do
     expect(storage.string_to_sign).to match %r[\APUT\n[^\n]+\ntext/yaml\n[^\n]*,[^\n]*:[^\n]*:[^\n]*\n/test-bucket/exchange(?:-.*){3}.yml\z]
   end
 
+  it "should set up a good HTTP connection" do
+    expect(storage.http.use_ssl?).to be_truthy
+    expect(storage.http.verify_mode).to eq OpenSSL::SSL::VERIFY_PEER
+
+  end
+
   it "should have a consistent index" do
     expect( storage.request_index ).to eq(storage.request_index)
 

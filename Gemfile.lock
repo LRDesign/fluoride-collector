@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fluoride-collector (0.0.5)
+    fluoride-collector (0.0.6)
 
 GEM
   remote: https://rubygems.org/

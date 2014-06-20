@@ -23,5 +23,12 @@ puts storage.uri
 p storage.response
 puts
 url = URI.parse(storage.uri)
+
 puts "And retrieved:"
-puts Net::HTTP.get(url)
+
+get_req = Net::HTTP::Get.new(url.to_s)
+http = Net::HTTP.new(url.host, 443)
+http.use_ssl = true
+http.start do
+  puts http.request(get_req)
+end

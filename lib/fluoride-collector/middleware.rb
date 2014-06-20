@@ -18,7 +18,13 @@ module Fluoride
         @config.persister(collection_type, record).write
       rescue Exception => ex
         #leave only footprints
-        $stderr.puts "#{ex.inspect}" if $stderr.respond_to? :puts
+        begin
+          if $stderr.respond_to? :puts
+            $stderr.puts ex.inspect
+            $stderr.puts ex.backtrace.inspect
+          end
+        rescue Exception
+        end
       end
 
       def clean_hash(hash)

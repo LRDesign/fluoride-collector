@@ -1,15 +1,22 @@
 require 'fluoride-collector'
 require 'fluoride-collector/storage'
-require 'net/http'
 require 'openssl'
 require 'base64'
+
+require 'net/http'
+require 'net/https'
+
 module Fluoride
   module Collector
     class Storage
       class S3 < Storage
         attr_reader :response
         def write
-          Net::HTTP.start(host, port, :use_ssl => true) do |http|
+          http = Net::HTTP.new(host, port)
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          http.ca_path = File.expand_path("../../../../certs", __FILE__)
+          http.start do
             @response = http.request(put_request)
           end
         end
@@ -50,9 +57,17 @@ module Fluoride
           "https://#{host}/#{remote_path}"
         end
 
+        def base64(data)
+          if Base64.respond_to?(:strict_encode64)
+            Base64.strict_encode64(data)
+          else
+            Base64.encode64(data).sub(/\s*\z/m,'')
+          end
+        end
+
         def authorization
           hmac = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, access_secret, string_to_sign)
-          signature = Base64.strict_encode64(hmac)
+          signature = base64(hmac)
 
           "AWS #{key_id}:#{signature}"
         end
@@ -62,7 +77,7 @@ module Fluoride
         end
 
         def content_md5
-          @context_md5 ||= Base64.strict_encode64(OpenSSL::Digest::MD5.digest(record_yaml))
+          @context_md5 ||= base64(OpenSSL::Digest::MD5.digest(record_yaml))
         end
 
         def content_type

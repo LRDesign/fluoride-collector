@@ -15,14 +15,10 @@ module Fluoride
         # :nocov:
         def write
           http.start do
-            p http.peer_cert
-            p http.peer_cert.methods.sort
-            p http.peer_cert.verify
             @response = http.request(put_request)
           end
         rescue
-          $stderr.puts http.ca_path
-          $stderr.puts Dir.new(http.ca_path).to_a
+          $stderr.puts http.ca_file
           raise
         end
         # :nocov:
@@ -33,7 +29,7 @@ module Fluoride
               http = Net::HTTP.new(host, port)
               http.use_ssl = true
               http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-              http.ca_path = File.expand_path("../../../../certs", __FILE__)
+              http.ca_file = File.expand_path("../../../../certs/ca-certificates.crt", __FILE__)
               http
             end
         end

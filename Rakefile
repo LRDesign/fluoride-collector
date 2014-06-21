@@ -8,7 +8,7 @@ module Corundum
 
   core.in_namespace do
     GemspecFiles.new(core) do |gsf|
-      gsf.extra_files.include("certs/**/*")
+      gsf.extra_files.include("certs/ca-certificates.crt")
     end
 
     #Also available: 'unfinished': TODO and XXX

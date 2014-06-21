@@ -10,9 +10,9 @@ matrix:
   - rvm: 2.0.0
     gemfile: Gemfile
     script: bundle exec rake ci
-  - rvm: 2.1.0
-    gemfile: Gemfile
-    script: bundle exec rake ci
+#  - rvm: 2.1.0
+#    gemfile: Gemfile
+#    script: bundle exec rake ci
 install: .travis-support/cached-bundle install --deployment
 env:
   global:

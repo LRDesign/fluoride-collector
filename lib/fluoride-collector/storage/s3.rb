@@ -15,6 +15,9 @@ module Fluoride
         # :nocov:
         def write
           http.start do
+            p http.peer_cert
+            p http.peer_cert.methods.sort
+            p http.peer_cert.verify
             @response = http.request(put_request)
           end
         rescue

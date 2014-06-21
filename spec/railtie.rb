@@ -11,10 +11,11 @@ describe Fluoride::Collector::Railtie do
   end
 
   let :rails_application do
-    Class.new(::Rails::Application) do
-      config.active_support.deprecation = :stderr
-      config.eager_load = false
-    end.tap do |app|
+    Class.new(::Rails::Application).tap do |app|
+      app.configure do
+        config.active_support.deprecation = :stderr
+        config.eager_load = false
+      end
       config(app)
       app.initialize!
     end

@@ -15,6 +15,8 @@ config.access_secret = yaml_config["access_secret"]
 storage = config.persister("test", {"exclaimation" => "Holy smokes it works!"})
 storage.write
 
+puts RUBY_VERSION
+
 puts "Sending:"
 puts storage.put_request.body
 puts

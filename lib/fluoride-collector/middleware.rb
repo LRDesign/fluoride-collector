@@ -18,6 +18,7 @@ module Fluoride
         @config.persister(collection_type, record).write
       rescue Exception => ex
         #leave only footprints
+        # :nocov:
         begin
           if $stderr.respond_to? :puts
             $stderr.puts ex.inspect
@@ -25,6 +26,7 @@ module Fluoride
           end
         rescue Exception
         end
+        # :nocov:
       end
 
       def clean_hash(hash)

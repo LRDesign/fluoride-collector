@@ -11,6 +11,8 @@ module Fluoride
     class Storage
       class S3 < Storage
         attr_reader :response
+
+        # :nocov:
         def write
           http.start do
             @response = http.request(put_request)
@@ -20,6 +22,7 @@ module Fluoride
           $stderr.puts Dir.new(http.ca_path).to_a
           raise
         end
+        # :nocov:
 
         def http
           @http ||=

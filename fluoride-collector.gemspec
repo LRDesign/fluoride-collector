@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name		= "fluoride-collector"
-  spec.version		= "0.0.6"
+  spec.version		= "0.0.7"
   author_list = {
     "Judson Lester" => 'nyarly@gmail.com',
     "Evan Down" => 'evan@lrdesign.com'

@@ -15,6 +15,10 @@ module Fluoride
           http.start do
             @response = http.request(put_request)
           end
+        rescue
+          $stderr.puts http.ca_path
+          $stderr.puts Dir.new(http.ca_path).to_a
+          raise
         end
 
         def http

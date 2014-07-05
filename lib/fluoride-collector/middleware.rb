@@ -53,8 +53,10 @@ module Fluoride
           env['rack.input'].rewind rescue nil
         end
         clean_hash(
+          "user_agent" => env['HTTP_USER_AGENT'],
           "content_type" => env['CONTENT_TYPE'],
-          "accept" => env["HTTP_ACCEPT_ENCODING"],
+          "accept" => env["HTTP_ACCEPT"],
+          "accept_encoding" => env["HTTP_ACCEPT_ENCODING"],
           "referer" => env["HTTP_REFERER"],
           "cookies" => env["HTTP_COOKIE"],
           "authorization" => env["HTTP_AUTHORIZATION"],

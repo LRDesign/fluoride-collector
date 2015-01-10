@@ -14,6 +14,9 @@ module Fluoride
       private
 
       def store(record)
+        if $stderr.respond_to? :puts
+          $stderr.puts "#{self.class.name}: Storing #{record.keys.inspect} with #{@config.persister_class.name}"
+        end
         #take only pictures
         @config.persister(collection_type, record).write
       rescue Exception => ex

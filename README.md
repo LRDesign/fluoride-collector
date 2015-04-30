@@ -8,7 +8,17 @@ The idea here is:
 
 Assuming that you're installing into your rails app deployed on Heroku:
 
-Add 'fluoride-collector' to your Gemfile and bundle install
+Add 'fluoride-collector' to your Gemfile and bundle install.
+
+== Saving collected exchanges
+
+Fluoride-collector can save exchanges either to local file storage or to AWS S3. The latter is primarily useful for environments where local file storage is unavailable, like Heroku.  
+
+=== Saving exchanges to local files
+
+There shouldn't be anything to do but add fluoride-collector to your Gemfile and bundle.  Exchange files will get written to fluoride/request_recordings.  
+
+=== Saving exchanges
 
 You will need to set up an AWS S3 bucket. More info here: http://docs.aws.amazon.com/AmazonS3/latest/gsg/CreatingABucket.html
 
@@ -32,7 +42,9 @@ Use your application.
 
 Check your S3 bucket. You should see a bunch of yml files with request information!
 
+== Analysis
 
+Analysis is performed by the [[Fluoride Analyzer](https://]
 
 
 Several types of analysis are planned:

@@ -6,7 +6,7 @@ module Fluoride
       config.fluoride = ActiveSupport::OrderedOptions.new
       config.fluoride.storage_limit = 250_000_000
       config.fluoride.tags = nil
-      config.fluoride.directory = "fluoride-collector"
+      config.fluoride.directory = "fluoride/recorded-requests"
       config.fluoride.store_to = :file
 
       initializer "fluoride-collector.add_middleware" do |app|
